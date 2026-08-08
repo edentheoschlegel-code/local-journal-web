@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Help — Local Journal</title>
+<meta name="description" content="Help for Local Journal: writing entries, searching, backups, the optional passcode lock, and what happens to your journal if you clear your data or remove the app.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://localjournalapp.com/support.html">
+<!-- This page ships in two places: the website, and inside the App Store build.
+     Answers that are true in only one of them — "clear your browser data",
+     private windows, the offline cache — are written twice, and the wrong half
+     is hidden: .only-web on the web, .only-app in the app. Same detection as
+     the app itself, plus ?native=1 for checking the app copy in a browser.
+     (Capacitor serves the app from capacitor://localhost.) -->
+<script>try{var n=(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform())||location.protocol==='capacitor:'||location.hostname==='localhost'||/[?&]native=1/.test(location.search);if(n)document.documentElement.className+=' native';}catch(e){}</script>
+<!-- ONE theme-color tag, kept in step with data-theme by theme-boot.js, exactly
+     as the app page does it. Media-gated tags cannot follow a manual in-app
+     override: a user on a light OS who picked Dark in the app would get a white
+     bar above a dark page. -->
+<meta name="theme-color" id="themeColorMeta" content="#fffdfb">
+<!-- Applies the theme the user chose IN THE APP before this page paints, so
+     following the footer's Help link out of a dark journal is not a flash of
+     white. Same file, same localStorage key as the app; it resolves "system" to
+     the OS preference itself. -->
+<script src="theme-boot.js"></script>
+<style>
+  :root {
+    --brand: #7b3f6b; --brand-dark: #632f56; --brand-soft: #f8f1f6;
+    --ink: #1e1c25; --muted: #6f6a73; --line: #ddd6d0; --bg: #f6f3f0; --card: #fffdfb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); background: var(--bg); margin: 0; line-height: 1.6;
+  }
+  .topbar {
+    padding: max(18px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 18px max(24px, env(safe-area-inset-left));
+    border-bottom: 1px solid var(--line); background: rgba(255,255,255,.85);
+    -webkit-backdrop-filter: saturate(180%) blur(12px); backdrop-filter: saturate(180%) blur(12px);
+    position: sticky; top: 0;
+  }
+  .topbar a { color: var(--ink); text-decoration: none; font-weight: 800; font-size: 17px; letter-spacing: -.3px; }
+  .topbar a .accent { color: var(--brand); }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 30px; letter-spacing: -.5px; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+  h2 { font-size: 19px; margin: 34px 0 10px; }
+  h3 { font-size: 16px; margin: 20px 0 6px; }
+  p, li { color: #333; font-size: 15.5px; }
+  /* Platform-aware copy. The web is the default view; html.native (set in
+     <head>) flips it. list-item rather than block so the .only-app variants
+     that sit inside <ul> keep their bullets. */
+  .only-app { display: none; }
+  html.native .only-web { display: none; }
+  html.native .only-app { display: block; }
+  html.native li.only-app { display: list-item; }
+  html.native span.only-app { display: inline; }
+  html.native h3.only-app { font-size: 16px; margin: 20px 0 6px; }
+  ul { padding-left: 22px; }
+  code {
+    background: var(--brand-soft); color: var(--brand-dark);
+    padding: 2px 6px; border-radius: 5px; font-size: 13.5px;
+  }
+  a { color: var(--brand); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; margin: 20px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; padding: 30px 24px max(40px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+  footer a { color: var(--muted); }
+  /* Dark mode follows the choice made in the app (theme-boot.js sets data-theme
+     on <html> before paint), falling back to the OS when that script cannot run
+     — JavaScript off, or the file missing offline. The media block is scoped to
+     :root:not([data-theme]) so it only speaks when nothing else has. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --brand: #d69fc4; --brand-dark: #e6b9d6; --brand-soft: #2b1e27;
+      --ink: #e6e4ea; --muted: #8e8a95; --line: rgba(255,255,255,.10); --bg: #17161a; --card: #201e24;
+    }
+    :root:not([data-theme]) .topbar { background: rgba(23,22,26,.84); }
+    :root:not([data-theme]) p, :root:not([data-theme]) li { color: #c8c4cf; }
+  }
+  [data-theme="dark"] {
+    --brand: #d69fc4; --brand-dark: #e6b9d6; --brand-soft: #2b1e27;
+    --ink: #e6e4ea; --muted: #8e8a95; --line: rgba(255,255,255,.10); --bg: #17161a; --card: #201e24;
+  }
+  [data-theme="dark"] .topbar { background: rgba(23,22,26,.84); }
+  [data-theme="dark"] p, [data-theme="dark"] li { color: #c8c4cf; }
+  :root { color-scheme: light dark; }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="/">Local <span class="accent">Journal</span></a></div>
+<main>
+  <h1>Help</h1>
+  <p class="sub">Local Journal keeps a journal on your device. Everything below happens right there — your entries are not sent to us.</p>
+
+  <h2>Writing</h2>
+  <h3>Where is the save button?</h3>
+  <p><span class="only-web">There isn't one. Your entry saves as you type, again when you leave a field, and again if you close the tab.</span><span class="only-app">There isn't one. Your entry saves as you type, again when you leave a field, and again if you leave the app.</span> The line under the editor tells you the state: <em>Saving…</em>, then <em>Saved</em>. If it ever says <em>Couldn't save</em>, a banner across the top explains why and your text stays in the editor so you can copy it out.</p>
+
+  <h3>Can I write for a past day?</h3>
+  <p>Yes. Change the date at the top of the entry, or open the Calendar and click a day you have not written on yet. A day that already has entries shows you those instead.</p>
+
+  <h3>What are the mood markers for?</h3>
+  <p>They are a marker for your own reference — Warm, Bright, Steady, Quiet, Low. Nothing is scored, ranked or added up. You can filter the list by one if that is useful to you, and ignore them entirely if it isn't.</p>
+
+  <h2>Finding things</h2>
+  <h3>Search</h3>
+  <p>The search box on the Entries page looks through titles, entry text and tags at once. Every word you type has to appear somewhere in the entry, up to the first eight words. Matches are highlighted in the preview line.</p>
+
+  <h3>Filters</h3>
+  <p>Tag pills and the mood menu narrow the list further, and they combine with search. <em>Clear filters</em> puts everything back.</p>
+
+  <h2>Backups</h2>
+  <h3>How do I keep a copy?</h3>
+  <p>Open <strong>Backup &amp; lock</strong> and choose an export:</p>
+  <ul>
+    <li><strong>Full backup (JSON)</strong> — everything, in the format the app can import back. This is the one to keep.</li>
+    <li><strong>Readable copy (Markdown)</strong> — a plain text file for reading or moving into another app.</li>
+    <li><strong>Printable copy (PDF)</strong> — a laid-out document for printing or filing.</li>
+  </ul>
+  <p class="only-app">The finished file is handed to the share sheet, and you choose where it goes — Save to Files, mail it to yourself, or send it to another app. Nothing leaves this device unless you send it somewhere.</p>
+  <p>Exported files are not encrypted, even if the passcode lock is on. Keep them somewhere you trust.</p>
+
+  <h3>Restoring a backup</h3>
+  <p>Choose your JSON backup on the same page. Before anything is written, you see exactly what will happen — how many entries would be added, how many replaced by a newer version, how many left alone — and you choose <strong>Merge</strong> or <strong>Replace everything</strong>. Merge never removes anything already in your journal.</p>
+
+  <h3>Can I move my journal to another device?</h3>
+  <p><span class="only-web">Export a full backup on the first device, move the file across however you like, and import it on the second.</span><span class="only-app">Export a full backup on the first device, send the file across however you like from the share sheet, and import it on the second.</span> There is no sync — moving the file is the whole mechanism.</p>
+
+  <h2>The passcode lock</h2>
+  <h3>What does it do?</h3>
+  <p>It encrypts your entries where they are stored on this device, so they cannot be read without the passcode. It is off by default.</p>
+
+  <h3>What if I forget the passcode?</h3>
+  <div class="card">
+    <p>There is no reset. Your passcode itself is never stored — not in any form. What is stored on this device is a random salt and a small check value that lets the app tell a correct passcode from a wrong one; neither reveals the passcode. There is no server to ask either, so a forgotten passcode means the entries cannot be opened again, by you or by anyone. Export a backup before you turn it on.</p>
+  </div>
+
+  <h3>Turning it off</h3>
+  <p>Enter your passcode once more on the <strong>Backup &amp; lock</strong> page. Your entries are re-saved unencrypted and the journal opens without a passcode from then on.</p>
+
+  <h2>Common questions</h2>
+  <h3>Does it work offline?</h3>
+  <p class="only-web">Yes. Once the page has loaded once, it runs with no connection at all — including search, the calendar and every export.</p>
+  <p class="only-app">Yes, always. Everything the app needs is inside the app, so there is nothing to load and no connection to wait for — search, the calendar and every export work the same with the device offline.</p>
+
+  <h3 class="only-web">What happens if I clear my browser data?</h3>
+  <p class="only-web">Your journal goes with it. Because nothing is stored anywhere else, a backup file is the only way back.</p>
+
+  <h3 class="only-app">What happens if I delete the app?</h3>
+  <p class="only-app">Your journal goes with it. Your entries live in this app's storage on this device and nowhere else — there is no account and no copy on a server — so deleting the app deletes them. Export a backup first; that file is the only way back.</p>
+
+  <h3 class="only-web">Private or incognito windows</h3>
+  <p class="only-web">Those windows throw away storage when they close. A private window usually accepts everything you write and then discards it at the end, and the app often cannot tell the difference while you are in one. Export before you close the window.</p>
+
+  <h3 class="only-app">Does my journal sync to iCloud or my other devices?</h3>
+  <p class="only-app">No. There is no sync of any kind, and the app writes nothing to iCloud. A journal written on this device stays on this device until you export a backup and move that file yourself.</p>
+
+  <h3>"This device is out of space"</h3>
+  <p class="only-web">The browser has hit its storage limit for this site. Free space on the device, or export a backup and remove older entries, then try again. The entry stays on screen so nothing is lost while you sort it out.</p>
+  <p class="only-app">The app has hit its storage limit on this device. Free space on the device, or export a backup and remove older entries, then try again. The entry stays on screen so nothing is lost while you sort it out.</p>
+
+  <h3>Is there an account or a subscription?</h3>
+  <p>No. There is no account, no sign-up, and nothing to pay for — every feature is free.</p>
+
+  <h2>Still stuck?</h2>
+  <p>Email <a href="mailto:support@edenapps.app">support@edenapps.app</a>. We can't see your journal, so please describe what you were doing and what happened.</p>
+</main>
+<footer>
+  <a href="/">Local Journal</a> · <a href="privacy.html">Privacy</a> · <a href="https://edenapps.app/terms.html" target="_blank" rel="noopener noreferrer">Terms</a><br>
+  An Eden Apps app · <a href="https://edenapps.app" target="_blank" rel="noopener noreferrer">edenapps.app</a>
+</footer>
+</body>
+</html>

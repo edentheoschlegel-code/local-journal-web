@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy Policy — Local Journal</title>
+<meta name="description" content="How Local Journal handles your data: your entries are stored on your device and are not sent to us, and the app talks to no server other than the one it is served from.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://localjournalapp.com/privacy.html">
+<!-- This page ships in two places: the website, and inside the App Store build.
+     Several statements below are true in exactly one of them — "runs in your
+     browser", "clear your browser's site data", the service-worker cache. Rather
+     than blur them into something vague enough to cover both, each one is
+     written twice and the wrong half is hidden: .only-web on the web,
+     .only-app in the app. Every claim stays exact on the platform reading it.
+     Same detection as the app itself, plus ?native=1 for checking the app copy
+     in a browser. (Capacitor serves the app from capacitor://localhost.) -->
+<script>try{var n=(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform())||location.protocol==='capacitor:'||location.hostname==='localhost'||/[?&]native=1/.test(location.search);if(n)document.documentElement.className+=' native';}catch(e){}</script>
+<!-- ONE theme-color tag, kept in step with data-theme by theme-boot.js, exactly
+     as the app page does it. Media-gated tags cannot follow a manual in-app
+     override: a user on a light OS who picked Dark in the app would get a white
+     bar above a dark page. -->
+<meta name="theme-color" id="themeColorMeta" content="#fffdfb">
+<!-- Applies the theme the user chose IN THE APP before this page paints, so
+     following the footer's Privacy link out of a dark journal is not a flash of
+     white. Same file, same localStorage key as the app; it resolves "system" to
+     the OS preference itself. -->
+<script src="theme-boot.js"></script>
+<style>
+  :root {
+    --brand: #7b3f6b; --brand-dark: #632f56; --brand-soft: #f8f1f6;
+    --ink: #1e1c25; --muted: #6f6a73; --line: #ddd6d0; --bg: #f6f3f0; --card: #fffdfb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); background: var(--bg); margin: 0; line-height: 1.6;
+  }
+  .topbar {
+    padding: max(18px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 18px max(24px, env(safe-area-inset-left));
+    border-bottom: 1px solid var(--line); background: rgba(255,255,255,.85);
+    -webkit-backdrop-filter: saturate(180%) blur(12px); backdrop-filter: saturate(180%) blur(12px);
+    position: sticky; top: 0;
+  }
+  .topbar a { color: var(--ink); text-decoration: none; font-weight: 800; font-size: 17px; letter-spacing: -.3px; }
+  .topbar a .accent { color: var(--brand); }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 30px; letter-spacing: -.5px; margin: 0 0 6px; }
+  .updated { color: var(--muted); font-size: 13.5px; margin-bottom: 28px; }
+  h2 { font-size: 19px; margin: 34px 0 10px; }
+  p, li { color: #333; font-size: 15.5px; }
+  /* Platform-aware copy. The web is the default view; html.native (set in
+     <head>) flips it. list-item rather than block so the .only-app variants
+     that sit inside <ul> keep their bullets. */
+  .only-app { display: none; }
+  html.native .only-web { display: none; }
+  html.native .only-app { display: block; }
+  html.native li.only-app { display: list-item; }
+  html.native span.only-app { display: inline; }
+  ul { padding-left: 22px; }
+  code {
+    background: var(--brand-soft); color: var(--brand-dark);
+    padding: 2px 6px; border-radius: 5px; font-size: 13.5px;
+    font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1;
+  }
+  a { color: var(--brand); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 22px; margin: 20px 0;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; padding: 30px 24px max(40px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+  footer a { color: var(--muted); }
+  /* Dark mode follows the choice made in the app (theme-boot.js sets data-theme
+     on <html> before paint), falling back to the OS when that script cannot run
+     — JavaScript off, or the file missing offline. The media block is scoped to
+     :root:not([data-theme]) so it only speaks when nothing else has. Tokens
+     mirror the app's dark theme so arriving from the main page is not a jump. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --brand: #d69fc4; --brand-dark: #e6b9d6; --brand-soft: #2b1e27;
+      --ink: #e6e4ea; --muted: #8e8a95; --line: rgba(255,255,255,.10); --bg: #17161a; --card: #201e24;
+    }
+    :root:not([data-theme]) .topbar { background: rgba(23,22,26,.84); }
+    :root:not([data-theme]) p, :root:not([data-theme]) li { color: #c8c4cf; }
+  }
+  [data-theme="dark"] {
+    --brand: #d69fc4; --brand-dark: #e6b9d6; --brand-soft: #2b1e27;
+    --ink: #e6e4ea; --muted: #8e8a95; --line: rgba(255,255,255,.10); --bg: #17161a; --card: #201e24;
+  }
+  [data-theme="dark"] .topbar { background: rgba(23,22,26,.84); }
+  [data-theme="dark"] p, [data-theme="dark"] li { color: #c8c4cf; }
+  :root { color-scheme: light dark; }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="/">Local <span class="accent">Journal</span></a></div>
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated 8 August 2026</p>
+
+  <h2>The short version</h2>
+  <div class="card">
+    <p class="only-web">What you write is stored on your device and is not sent to us. Local Journal runs in your browser — there is no account, no sign-up and no sync, and we operate no service that receives your entries. The only server it talks to is the one that serves the app's own files: the page, its script, its icons, and the PDF engine when you first export a PDF. The app page carries a Content-Security-Policy that names no host other than the one serving it, so the browser blocks the page from loading or contacting anything else.</p>
+    <p class="only-app">What you write is stored on your device and is not sent to us. Local Journal runs entirely on this device — there is no account, no sign-up and no sync, and we operate no service that receives your entries. It talks to no server at all: everything the app needs, including the PDF engine, is inside the app itself. The app's main screen also carries a Content-Security-Policy that names no host whatsoever, so nothing there can load or contact anything off this device.</p>
+  </div>
+
+  <h2>What it stores, and where</h2>
+  <p class="only-web">Everything you write is saved in this browser's own storage on this device:</p>
+  <p class="only-app">Everything you write is saved in this app's own private storage on this device, sandboxed to Local Journal the way any other app's data is:</p>
+  <ul>
+    <li class="only-web"><strong>Your entries</strong> — date, title, text, mood marker and tags, plus when each one was written and last changed — in this browser's IndexedDB database, named <code>localjournal</code>.</li>
+    <li class="only-app"><strong>Your entries</strong> — date, title, text, mood marker and tags, plus when each one was written and last changed — in the app's own IndexedDB database, named <code>localjournal</code>.</li>
+    <li><strong>Your theme preference</strong> — light, dark or follow-the-system — under the key <code>localjournal.theme</code>.</li>
+    <li><strong>The date of your last export</strong>, under <code>localjournal.last_backup</code>, so the app can tell you when you last took a backup.</li>
+    <li><strong>A copy of the entry you are currently writing</strong>, under <code>localjournal.draft_mirror</code>, so that <span class="only-web">closing the tab</span><span class="only-app">leaving the app</span> mid-sentence does not lose it. It is deleted as soon as that entry saves successfully; if saving keeps failing — because the device is out of space, say — it stays until a save succeeds, which is what makes the text recoverable. It is not written at all while the passcode lock is on.</li>
+    <li><strong>The passcode lock's settings</strong>, if you turn the lock on — a random salt, the number of rounds used to derive the key, and a small encrypted check value — in the same <code>localjournal</code> database. Your passcode is not among them, and neither is anything you have written.</li>
+    <li class="only-web"><strong>A copy of the app itself</strong>, in the browser's cache storage, so the journal opens without a connection. This is the app's own files — the page, its script, its styles, its icons and the PDF engine — under a megabyte of them. It holds nothing you have written.</li>
+  </ul>
+  <p class="only-web">The app sends none of this anywhere. Clearing your browser's site data for this site removes all of it, permanently — there is no copy elsewhere to restore from.</p>
+  <p class="only-app">The app sends none of this anywhere. Deleting the app removes all of it from this device, permanently — we hold no copy to restore from, so export a backup before you delete it. One copy can exist outside the app without us: if your iPhone backs itself up, to iCloud or to a computer, that backup may include this app's data along with every other app's, kept under whatever protection Apple gives the backup itself — and that is usually what brings a journal across when you set up a new phone.</p>
+
+  <h2>Working offline</h2>
+  <p class="only-web">The app installs a service worker — a small piece of the app that the browser keeps — which stores a copy of the app's own files so the journal opens and works with no connection. That copy is why this site shows a megabyte or two of cache storage if you look at it in your browser's site-data settings — browsers each count it a little differently; it is the app, not your journal. Your entries are not in it, and it is not sent anywhere. Clearing this site's data removes it along with everything else, and the app reinstalls it the next time you open the page online.</p>
+  <p class="only-app">There is nothing to load. The app's own files — its screens, its script, its styles, its icons and the PDF engine — are inside the app you installed, so the journal opens and every part of it works with no connection at all, including search, the calendar and every export. Turning the device off the network changes nothing about how it behaves.</p>
+
+  <h2>What the app sends</h2>
+  <p class="only-web">Nothing you write. The app contains no analytics, no advertising, no error-reporting and no payment code of any kind — it is free and has no billing. The app page carries a Content-Security-Policy that names no host other than the one it is served from — every source is <code>'self'</code>, alongside the <code>data:</code> and <code>blob:</code> forms the page generates for itself and its own inline styles — so the browser blocks the page from loading or contacting anything else. This policy is set on the app page. These supporting pages hold nothing you have written and reach for nothing beyond this site — their own text, a small script that matches the theme you chose, and the site icon.</p>
+  <p class="only-app">Nothing you write — and, in this app, nothing at all. It contains no analytics, no advertising, no error-reporting and no payment code of any kind: it is free, and there is no purchase to make. The app's main screen carries a Content-Security-Policy naming no host — every source is <code>'self'</code>, meaning the app's own bundled files, alongside the <code>data:</code> and <code>blob:</code> forms it generates for itself and its own inline styles — so nothing on that screen can load or contact anything off this device. These few supporting pages carry no policy of their own; they hold nothing you have written and load only what is already inside the app.</p>
+  <p class="only-web">Two ordinary things do happen that are worth naming plainly. Requesting the app's own files leaves an entry in the access log of whatever host is serving it — an IP address, a timestamp and a browser string, as every website records. And some things happen at the level of your browser or operating system rather than inside this app: dictation, predictive keyboards, and browser spell-checking can send what you type to the company that makes them. The app turns spell-checking off on the entry fields for that reason, but the rest sits outside what any web page can control.</p>
+  <p class="only-app">One thing is worth naming plainly, because it sits outside the app. Some text handling happens at the level of your device rather than inside Local Journal: dictation and predictive keyboards can send what you type to the company that makes them. The app turns spell-checking off on the entry fields for that reason, but the rest is your device's own behaviour, not something any app can switch off for you.</p>
+
+  <h2>The optional passcode lock</h2>
+  <p>You can turn on a passcode that encrypts your entries where they are stored. From then on, entries are written encrypted. If you do:</p>
+  <ul>
+    <li>The key is derived from your passcode with PBKDF2-HMAC-SHA256 (310,000 iterations, 16-byte random salt) and used as an AES-GCM-256 key.</li>
+    <li>The key exists only in your device's memory for that session. It is never written to storage and never sent anywhere.</li>
+    <li>Your passcode itself is never stored — not in any form.</li>
+    <li><strong>There is no reset and no recovery.</strong> Because there is no server, there is nobody to ask. If you forget the passcode, the entries stay encrypted for good.</li>
+  </ul>
+  <p>The passcode lock protects your entries where they sit in <span class="only-web">browser storage</span><span class="only-app">the app's storage</span>. It is not a defence against someone using your unlocked device while the journal is open on screen.</p>
+  <p class="only-web">One honest limit: if you journalled for a while before turning the lock on, the app rewrites those entries in encrypted form, but browsers do not let a page erase the bytes the old versions occupied — the browser reclaims that space in its own time. If you want the earlier unencrypted copies gone for certain, clear this site's data after exporting a backup, or start again in a fresh browser profile.</p>
+  <p class="only-app">One honest limit: if you journalled for a while before turning the lock on, the app rewrites those entries in encrypted form, but it cannot erase the bytes the old versions occupied — the system reclaims that space in its own time. If you want the earlier unencrypted copies gone for certain, export a backup, delete the app, and install it again.</p>
+
+  <h2>Exports</h2>
+  <p class="only-web">Exported JSON, Markdown and PDF files are built on your device and saved straight to your downloads. They are <strong>not</strong> encrypted, even when the passcode lock is on — that is what makes them readable elsewhere. Keep them somewhere you trust.</p>
+  <p class="only-app">Exported JSON, Markdown and PDF files are built on your device. The finished file is handed to your device's own share sheet, where you choose what happens to it next — save it to Files, mail it to yourself, or send it somewhere else. The app does not choose, and it sends the file nowhere on its own. Exports are <strong>not</strong> encrypted, even when the passcode lock is on — that is what makes them readable elsewhere. Making one writes that same unencrypted file into the app's own cache folder on the way to the share sheet, and the app removes it again once the share sheet closes — whether you sent the file somewhere or changed your mind. If one is ever left behind, by the app being closed mid-share say, the next start looks for it and clears it; deleting the app removes anything still there along with everything else. Keep them somewhere you trust.</p>
+
+  <h2 class="only-app">Permissions</h2>
+  <p class="only-app">The app asks for <strong>no device permissions at all</strong> — no contacts, no photos, no location, no camera, no microphone, no notifications. The system interactions it makes are the standard share sheet, used to hand a file you exported to an app you pick; the standard file picker, used when you choose a backup to import; and writing that exported file into the app's own cache folder on the way to the share sheet, then removing it afterwards. Those happen when you ask for an export or an import. The one thing you do not ask for is the tidy-up when the app starts, which looks in that same cache folder for an export left behind and clears it.</p>
+
+  <h2>Children</h2>
+  <p>Local Journal is not directed at children under 13. It has no account system and no way to collect personal information from anyone who uses it.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, the date at the top changes with it.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about privacy? Email <a href="mailto:support@edenapps.app">support@edenapps.app</a>.</p>
+</main>
+<footer>
+  <a href="/">Local Journal</a> · <a href="support.html">Help</a> · <a href="https://edenapps.app/terms.html" target="_blank" rel="noopener noreferrer">Terms</a><br>
+  An Eden Apps app · <a href="https://edenapps.app" target="_blank" rel="noopener noreferrer">edenapps.app</a>
+</footer>
+</body>
+</html>

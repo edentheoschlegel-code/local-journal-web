@@ -1,0 +1,30 @@
+{
+  "name": "Local Journal — A Private Journal on Your Device",
+  "short_name": "Local Journal",
+  "description": "Write and keep a journal right on your device. Entries are stored in your browser on this device — no account, no sync, and no analytics or advertising code in the app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#7b3f6b",
+  "background_color": "#f6f3f0",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "brand-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

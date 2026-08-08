@@ -1,0 +1,1057 @@
+/* ── Local Journal — a private journal that stays on your device ──────────
+   Accent: MULBERRY. Warm neutrals, family structure, family token names.
+   Eden chose mulberry over the builder's amber on 2026-08-06; the token set
+   below is the design spec's §2 in full, with an app bridge layer underneath
+   that keeps every downstream rule (which reads the family names --brand,
+   --ink, --line, --card …) working unchanged.
+
+   Every value in :root has a dark override in [data-theme="dark"] below, so
+   no surface is light-only. Downstream rules read tokens only — dark mode is
+   a token swap, never a second set of rules.
+
+   Contrast ratios in comments are computed, not eyeballed; the pairs that
+   carry text were re-checked with a WCAG relative-luminance script during the
+   apply pass (see STATUS.md for the run and its output). */
+:root {
+  color-scheme: light;
+
+  /* ── Surfaces — four rungs, not two ──────────────────────────────── */
+  --surface-sunken:  #ece8e4;   /* wells, tracks, disabled */
+  --surface-canvas:  #f6f3f0;   /* the page */
+  --surface-raised:  #fffdfb;   /* cards, rows, the paper */
+  --surface-overlay: #fffdfb;   /* sheets, modals, menus */
+  --surface-inverse: #1c1a1f;   /* toasts, tooltips */
+  --surface-scrim:   rgba(28, 24, 22, .46);
+  --surface-chrome:  rgba(255, 253, 251, .84);
+  --surface-chrome-solid: #fffdfb;      /* @supports fallback, no blur */
+
+  /* ── Borders — decorative vs control. Never mix them up. ─────────── */
+  --border-subtle:  #ece6e1;    /* dividers INSIDE a card. Decorative. */
+  --border-default: #ddd6d0;    /* the edge of a card */
+  --border-control: #8a8288;    /* 3.5:1 on --surface-raised — the edge of an
+                                   INPUT, checkbox, chip. WCAG 1.4.11. */
+  --border-strong:  #c3b9b2;    /* hovered control, drag target */
+  --border-inset:   rgba(28, 24, 22, .07);
+
+  /* ── Text ─────────────────────────────────────────────────────────── */
+  --text-primary:   #1e1c25;    /* 16.4:1 on --surface-raised */
+  --text-secondary: #504c58;    /*  8.3:1 */
+  --text-tertiary:  #6f6a73;    /*  5.2:1 */
+  --text-disabled:  #6a6470;    /*  4.70:1 on --surface-sunken (measured in the
+                                   browser during the apply pass; the spec's
+                                   #7a747d measured 3.73 and was corrected).
+                                   NOT opacity. */
+  --prose-ink:      #24222c;    /* entry body only — softened for length */
+
+  /* ── Accent — mulberry. --accent lifts in dark so accent TEXT stays
+       legible; --accent-fill does NOT lift, so the white label on a solid
+       control stays legible. Separating them is what removes the
+       [data-theme="dark"] button override the siblings each invented. ── */
+  --accent:          #7b3f6b;   /* 7.6:1 on white — text, icons, caret */
+  --accent-strong:   #632f56;   /* pressed, link hover */
+  --accent-fill:     #7b3f6b;   /* the fill of a solid control */
+  --accent-ink:      #ffffff;   /* label on --accent-fill — 7.6:1 */
+  --accent-quiet:    #f8f1f6;   /* selected row, hover tint, chip */
+  --accent-line:     #e9d5e2;
+  --accent-ring:     rgba(123, 63, 107, .22);
+
+  /* ── Status. Amber stays amber: warn is a status, not the brand. ─── */
+  --ok-quiet: #f0fdf9;  --ok-line: #99f6e4;
+  --warn:     #b45309;  --warn-quiet: #fffbeb; --warn-line: #fde68a;
+  --danger-on: #ffffff;
+  --danger-quiet: #fef2f2; --danger-line: #fecaca;
+
+  /* ── Focus — two layers. A brand ring alone is invisible on a brand
+       button. The hairline always separates; the ring always shows. ─── */
+  --focus-ring: var(--accent);
+  --focus-hair: #ffffff;
+  --focus-halo: rgba(123, 63, 107, .18);
+
+  /* ── Type ─────────────────────────────────────────────────────────── */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+             "Helvetica Neue", Arial, sans-serif;
+  --font-read: ui-serif, "New York", "Iowan Old Style", Charter,
+               "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --editor-font: var(--font-read);
+
+  --t-read:    17px;  --lh-read: 1.62;      /* editor, phone */
+  --t-read-lg: 18px;  --lh-read-lg: 1.66;   /* editor, ≥768px */
+  --measure:   36rem;                       /* 576px ≈ 62–68 characters */
+  /* 1.62/1.66 is an intentional departure from the family's 1.5: that value is
+     tuned for 15px UI text in short runs. At 17–18px across 60+ characters the
+     return sweep starts landing on the wrong line. */
+
+  /* ── Radius ───────────────────────────────────────────────────────── */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-full: 999px;
+
+  /* ── Motion. Exits are ~2/3 of entrances: the user already decided. ── */
+  --dur-1: 90ms;    /* press feedback, under the finger */
+  --dur-2: 150ms;   /* colour / border / state, no travel */
+  --dur-3: 220ms;   /* appears or leaves in place */
+  --dur-4: 300ms;   /* travels */
+  --dur-5: 450ms;   /* full-height sheet on a phone */
+  --dur-exit-3: 150ms;
+  --dur-exit-4: 200ms;
+
+  --ease-out:    cubic-bezier(.05,.70,.10,1);
+  --ease-in:     cubic-bezier(.30,0,.80,.15);
+  --ease-inout:  cubic-bezier(.65,0,.35,1);
+  --ease-snap:   cubic-bezier(.20,0,.10,1);
+  --ease-settle: cubic-bezier(.34,1.30,.64,1);  /* used in ONE place */
+
+  /* ── Elevation. Light: shadow carries depth. ─────────────────────── */
+  --shadow-color: 24 14% 14%;
+  --e1: 0 1px 2px hsl(var(--shadow-color)/.05), 0 1px 3px hsl(var(--shadow-color)/.07);
+  --e2: 0 1px 2px hsl(var(--shadow-color)/.05), 0 4px 10px -2px hsl(var(--shadow-color)/.08);
+  --e3: 0 2px 4px hsl(var(--shadow-color)/.06), 0 12px 24px -6px hsl(var(--shadow-color)/.12);
+  --e4: 0 4px 8px hsl(var(--shadow-color)/.07), 0 24px 48px -12px hsl(var(--shadow-color)/.18);
+  --e5: 0 8px 16px hsl(var(--shadow-color)/.08), 0 40px 80px -20px hsl(var(--shadow-color)/.26);
+  --catchlight: inset 0 1px 0 rgba(255,255,255,.9);
+  --accent-shadow: rgba(123, 63, 107, .20);
+  --accent-shadow-hi: rgba(123, 63, 107, .26);
+
+  /* ── App bridge — the family names every rule below already reads. ── */
+  --brand: var(--accent);
+  --brand-dark: var(--accent-strong);
+  --brand-light: #d69fc4;        /* accent ON the inverse surface (toast) */
+  --brand-soft: var(--accent-quiet);
+  --brand-border: var(--accent-line);
+  --brand-fill: var(--accent-fill);
+  --brand-on: var(--accent-ink);
+
+  --ink: var(--text-primary);
+  --muted: var(--text-tertiary);
+  --line: var(--border-default);
+  --bg: var(--surface-canvas);
+  --card: var(--surface-raised);
+  --ok: #0f766e;
+  --danger: #b3261e;
+  --danger-fill: #b3261e;        /* white on #b3261e ≈ 6.5:1 */
+
+  --shadow-sm: var(--e1);
+  --shadow-md: var(--e2);
+  --shadow-lg: var(--e5);
+  --shadow: var(--e1);
+
+  /* Status tones. .note is the neutral one — a cancelled action is not an
+     error and must never be red. */
+  --info-bg: #f3efec; --info-ink: #504c58; --info-border: #e4ded8;
+  --ok-bg: var(--ok-quiet);   --ok-border: var(--ok-line);
+  --err: #b3261e;     --err-bg: var(--danger-quiet); --err-ink: #b3261e; --err-border: var(--danger-line);
+  --amber-bg: var(--warn-quiet); --amber-ink: #92600a; --amber-border: var(--warn-line);
+
+  --topbar-bg: var(--surface-chrome);
+  --header-shadow: 0 1px 2px hsl(var(--shadow-color)/.05);
+  --pill-bg: var(--ok-quiet);
+  --pill-border: var(--ok-line);
+  --input-bg: var(--surface-raised);
+  --input-bg-focus: var(--surface-raised);
+  --chip-neutral-bg: var(--surface-sunken);
+  --footer-ink: #5c5862;         /* 6.8:1 on --surface-canvas */
+  --surface-2: var(--surface-sunken);
+  --card-topline: rgba(255,255,255,.7);
+  --backdrop: var(--surface-scrim);
+  --skeleton: linear-gradient(90deg, #ece8e4 25%, #f6f3f0 50%, #ece8e4 75%);
+
+  /* Nav shell */
+  --sidebar-bg: var(--surface-raised);
+  --sidebar-border: var(--border-default);
+  --nav-ink: var(--text-secondary);
+  --nav-hover-bg: #f2ede9;
+  --nav-active-bg: var(--accent-quiet);
+  --nav-active-ink: var(--accent-strong);
+
+  /* Sidebar privacy card */
+  --side-privacy-bg: var(--accent-quiet);
+  --side-privacy-border: var(--accent-line);
+  --side-privacy-ink: var(--accent-strong);
+  --side-privacy-text: #6b4560;  /* 6.5:1 on --accent-quiet */
+  --trust-sub-ink: #6b4560;
+  /* --muted on the sunken surface lands just under AA, so tinted surfaces get
+     their own sub-ink token rather than borrowing --muted. */
+  --muted-on-2: #5b5661;
+  /* Placeholder ink. It used to borrow --text-tertiary, which is measured
+     against the resting field background — but a focused field swaps to
+     --input-bg-focus, and in dark that surface pulled the same grey down to
+     4.41:1. Its own token, measured against the focused surface, the same way
+     --muted-on-2 and --trust-sub-ink already work. */
+  --placeholder-ink: var(--text-tertiary);   /* 5.2:1 on the focused field */
+
+  /* Mood markers — one accent, five saturations, five words. Every one also
+     carries a distinct glyph in the markup, so colour never carries the
+     meaning on its own (WCAG 1.4.1). */
+  --mood-low-bg: #ecdfe8;    --mood-low-ink: #4a2340;
+  --mood-quiet-bg: #dfcdda;  --mood-quiet-ink: #4a2340;
+  --mood-steady-bg: #d3bccc; --mood-steady-ink: #4a2340;
+  --mood-warm-bg: #c6aabe;   --mood-warm-ink: #4a2340;
+  --mood-bright-bg: #ba98b0; --mood-bright-ink: #3d1c35;
+
+  /* Calendar. Written vs unwritten differs by fill AND by a dot, not by
+     colour alone. */
+  --cal-empty-bg: var(--surface-sunken);
+  --cal-has-bg: #f0e2ec;
+  --cal-has-ink: var(--accent-strong);
+  --cal-has-border: #dcc0d3;
+  --cal-today-ring: var(--accent);
+
+  --mark-bg: #f3e3ef;
+  --mark-ink: var(--text-primary);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-sunken:  #100f12;
+  --surface-canvas:  #17161a;
+  --surface-raised:  #201e24;
+  --surface-overlay: #29262d;
+  --surface-inverse: #f4f1ee;
+  --surface-scrim:   rgba(0,0,0,.62);
+  --surface-chrome:  rgba(23,22,26,.84);
+  --surface-chrome-solid: #17161a;
+
+  /* rgba borders in dark: they composite correctly on all four surfaces. */
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-default: rgba(255,255,255,.10);
+  --border-control: #7d7783;    /* 4.0:1 on --surface-raised */
+  --border-strong:  rgba(255,255,255,.20);
+  --border-inset:   rgba(0,0,0,.40);
+
+  --text-primary:   #e6e4ea;
+  --text-secondary: #a9a5b0;    /* 6.8:1 on --surface-raised */
+  --text-tertiary:  #8e8a95;    /* 4.9:1 on --surface-raised */
+  --placeholder-ink: #97929e;   /* 4.9:1 on --surface-overlay, the focused field
+                                   (--text-tertiary measured 4.41 there) */
+  --text-disabled:  #837d8b;    /* 4.80:1 on --surface-sunken (measured; the
+                                   spec's #6a6570 measured 3.37) */
+  --prose-ink:      #dcdae2;    /* softened: near-white haloes on near-black */
+
+  --accent:        #d69fc4;     /* 7.5:1 on --surface-raised */
+  --accent-strong: #e6b9d6;
+  --accent-fill:   #7b3f6b;     /* UNCHANGED — the white label is still 7.6:1 */
+  --accent-ink:    #ffffff;
+  --accent-quiet:  #2b1e27;
+  --accent-line:   #48303f;
+  --accent-ring:   rgba(214,159,196,.30);
+
+  --ok-quiet: #0f2a24;  --ok-line: #1f5648;
+  --warn: #f2b03c;      --warn-quiet: #2b2210; --warn-line: #5a4a1a;
+  --danger-quiet: #2e1618; --danger-line: #5c2b2f;
+
+  --focus-hair: #17161a;
+  --focus-halo: rgba(214,159,196,.26);
+
+  --shadow-color: 0 0% 0%;
+  --e1: 0 1px 1px hsl(0 0% 0%/.30);
+  --e2: 0 1px 2px hsl(0 0% 0%/.35), 0 3px 6px -2px hsl(0 0% 0%/.30);
+  --e3: 0 2px 4px hsl(0 0% 0%/.40), 0 8px 16px -6px hsl(0 0% 0%/.38);
+  --e4: 0 4px 8px hsl(0 0% 0%/.45), 0 16px 32px -12px hsl(0 0% 0%/.48);
+  --e5: 0 8px 16px hsl(0 0% 0%/.50), 0 32px 64px -20px hsl(0 0% 0%/.60);
+  --catchlight: inset 0 1px 0 rgba(255,255,255,.07);
+  --accent-shadow: rgba(0,0,0,.45);
+  --accent-shadow-hi: rgba(0,0,0,.55);
+
+  /* ── App bridge, dark ──────────────────────────────────────────────── */
+  --brand-light: #e6b9d6;
+  --ok: #3fd0ae;
+  --danger: #ff9d9d;             /* red TEXT on dark */
+  --danger-fill: #b3261e;        /* white on it ≈ 6.5:1 */
+
+  --info-bg: #23212a; --info-ink: #c9c5d2; --info-border: rgba(255,255,255,.10);
+  --err: #ff9d9d;     --err-ink: #ff9d9d;
+  --amber-ink: #f2b03c;
+
+  --header-shadow: 0 1px 2px rgba(0,0,0,.4);
+  --input-bg: var(--surface-raised);
+  --input-bg-focus: var(--surface-overlay);
+  --chip-neutral-bg: var(--surface-overlay);
+  --footer-ink: #8e8a95;
+  --card-topline: rgba(255,255,255,.07);
+  --skeleton: linear-gradient(90deg, #23212a 25%, #29262d 50%, #23212a 75%);
+
+  --sidebar-bg: #1b191f;
+  --nav-ink: var(--text-secondary);
+  --nav-hover-bg: #29262d;
+  --nav-active-bg: var(--accent-quiet);
+  --nav-active-ink: var(--accent-strong);
+
+  --side-privacy-text: #cbb2c4;
+  --trust-sub-ink: #cbb2c4;
+  --muted-on-2: var(--text-secondary);
+
+  --mood-low-bg: #362d37;    --mood-low-ink: #f3e6ef;
+  --mood-quiet-bg: #483a47;  --mood-quiet-ink: #f3e6ef;
+  --mood-steady-bg: #5a4757; --mood-steady-ink: #f8eef5;
+  --mood-warm-bg: #6c5467;   --mood-warm-ink: #fbf3f8;
+  --mood-bright-bg: #7f6177; --mood-bright-ink: #ffffff;
+
+  --cal-empty-bg: #24222a;
+  --cal-has-bg: #3a2635;
+  --cal-has-ink: var(--accent-strong);
+  --cal-has-border: #593c50;
+  --cal-today-ring: var(--accent);
+
+  --mark-bg: #4a2c40;
+  --mark-ink: #f6ecf3;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* min-height, not height: a fixed-height body caps the sticky topbar's
+   containing block, so the header slides away as soon as the page is longer
+   than one screen. */
+html { height: 100%; }
+body { min-height: 100%; }
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.5;
+  font-synthesis: none;
+}
+/* Antialiasing in dark only — on light it thins strokes and under-weights the
+   text. */
+[data-theme="dark"] body { -webkit-font-smoothing: antialiased; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; font-size: 14px; }
+a { color: var(--brand); }
+.hidden { display: none !important; }
+::selection { background: var(--accent-ring); color: var(--text-primary); }
+
+/* Numbers a reader compares — counts, dates, word totals — get tabular figures
+   so columns and running totals do not jitter as they change. */
+.tnum, .wordcount, .cal-day, .cal-dow, .stat-value, .month-count, .entry-date,
+.streak-num, .list-count, .savenote, input[type="date"] {
+  font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1;
+}
+
+/* Colour-only state changes: --dur-2, no travel. Enumerated properties, never
+   `transition: all` — `all` picks up whatever gets added months later. */
+@media (prefers-reduced-motion: no-preference) {
+  body, .topbar, .panel, .entry-row, .modal, .sidebar, .nav-item,
+  .field input, .field textarea, select, .mood-chip, .filter-pill, .cal-day,
+  .icon-btn, .theme-toggle, .tag-chip {
+    transition: background-color var(--dur-2) var(--ease-out),
+                border-color var(--dur-2) var(--ease-out),
+                color var(--dur-2) var(--ease-out);
+  }
+}
+
+/* ── Chrome ────────────────────────────────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px max(28px, env(safe-area-inset-right)) 14px max(28px, env(safe-area-inset-left));
+  padding-top: max(14px, env(safe-area-inset-top));
+  background: var(--topbar-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(12px); backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--header-shadow);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: none; color: var(--ink); text-decoration: none; padding: 0;
+}
+.logo img { border-radius: 8px; display: block; }
+.logo b { font-size: 17px; font-weight: 800; letter-spacing: -.3px; white-space: nowrap; }
+.logo b .wm-accent { color: var(--brand); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.privacy-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--pill-bg); border: 1px solid var(--pill-border); color: var(--ok);
+  border-radius: 999px; padding: 6px 13px; font-size: 12.5px; font-weight: 700;
+}
+.privacy-pill svg { width: 14px; height: 14px; }
+.privacy-pill .pill-short { display: none; }
+@media (max-width: 640px) {
+  .privacy-pill .pill-long { display: none; }
+  .privacy-pill .pill-short { display: inline; }
+}
+/* Pill stays visible on phones, matching Local Scan — Eden wants the privacy
+   line seen where the app is actually used. (2026-08-07) */
+
+.theme-toggle {
+  width: 38px; height: 38px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover { background: var(--surface-2); border-color: var(--border-strong); }
+}
+.theme-toggle:active { background: var(--surface-2); }
+.theme-toggle svg { width: 18px; height: 18px; }
+@media (max-width: 440px) { .theme-toggle { width: 44px; height: 44px; } }
+
+/* ── Shell ─────────────────────────────────────────────────────────────── */
+.shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); align-items: start; }
+.sidebar {
+  position: sticky; top: 67px; min-width: 0;
+  height: calc(100dvh - 67px);
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border);
+  padding: 20px 14px 20px max(14px, env(safe-area-inset-left));
+  overflow-y: auto;
+}
+.side-nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 9px 12px; border-radius: 11px;
+  color: var(--nav-ink); background: none; border: none; text-decoration: none;
+  font-size: 14.5px; font-weight: 600; text-align: left;
+}
+.nav-item svg { width: 18px; height: 18px; flex: none; }
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:hover { background: var(--nav-hover-bg); color: var(--ink); }
+}
+.nav-item:active { background: var(--nav-hover-bg); }
+.nav-item.active { background: var(--nav-active-bg); color: var(--nav-active-ink); font-weight: 700; }
+/* A shape cue on top of colour so the active page is not signalled by colour
+   alone. */
+.nav-item.active::before {
+  content: ""; position: absolute; left: 0; top: 10px; bottom: 10px;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--brand);
+}
+
+.side-privacy {
+  position: relative; overflow: hidden; margin-top: auto;
+  background: var(--side-privacy-bg); border: 1px solid var(--side-privacy-border);
+  border-radius: 15px; padding: 15px 16px; box-shadow: var(--shadow-sm);
+}
+.side-privacy-title { font-size: 13px; font-weight: 800; color: var(--side-privacy-ink); margin-bottom: 4px; }
+/* padding-right keeps the copy clear of the padlock behind it rather than
+   relying on z-index to keep it legible through the glyph. */
+.side-privacy-text { font-size: 12px; line-height: 1.5; color: var(--side-privacy-text); position: relative; z-index: 1; padding-right: 46px; }
+.side-privacy-lock { position: absolute; right: 10px; bottom: 8px; z-index: 0; width: 46px; height: 46px; color: var(--side-privacy-border); pointer-events: none; }
+
+/* Locked: the rail is removed rather than disabled, so there is no route out of
+   the lock screen to offer in the first place. */
+.shell.is-locked { grid-template-columns: 1fr; }
+.shell.is-locked .sidebar { display: none; }
+
+.main-col { min-width: 0; }
+.route-view {
+  max-width: 1120px; margin: 0 auto;
+  padding: 24px max(20px, env(safe-area-inset-right)) 8px max(20px, env(safe-area-inset-left));
+}
+
+/* ── Panels ────────────────────────────────────────────────────────────── */
+.panel {
+  position: relative;
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  padding: 22px; box-shadow: var(--shadow-md); margin-bottom: 18px;
+}
+.panel::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 1px;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(90deg, transparent, var(--card-topline), transparent);
+}
+.panel > h2 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+/* .panel-subhead is an H2 that has to LOOK like a panel's H3: it sits under the
+   view's H1, so the rank cannot skip, but its weight in the page is a panel
+   sub-head. Tag, not size, is what the screen reader reads. */
+.panel > h3, .panel > h2.panel-subhead { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.panel-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 16px; }
+.page-head { margin-bottom: 16px; }
+.page-head h1 { font-size: 26px; font-weight: 800; letter-spacing: -.6px; }
+.page-head p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.micro-label {
+  display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; color: var(--muted); margin-bottom: 6px;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.btn {
+  min-height: 44px;
+  border: 1px solid transparent; border-radius: var(--r-md); padding: 11px 20px;
+  font-weight: 700; font-size: 14.5px;
+  background: var(--brand-fill); color: var(--brand-on);
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  /* Labels wrap rather than ellipsise, so a 200% text size still reads. */
+  white-space: normal;
+  box-shadow: 0 6px 18px var(--accent-shadow);
+  text-decoration: none;
+  transition: background-color var(--dur-2) var(--ease-out),
+              box-shadow var(--dur-2) var(--ease-out),
+              transform var(--dur-2) var(--ease-out);
+}
+.btn svg { width: 16px; height: 16px; flex: none; }
+/* -webkit-tap-highlight-color: transparent removes the only built-in touch
+   feedback, so every interactive element supplies its own :active. Not
+   optional. Hover lives behind the capability query — on iOS a tapped element
+   keeps :hover until something else is tapped. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px); box-shadow: 0 10px 24px var(--accent-shadow-hi);
+  }
+}
+.btn:active {
+  transform: scale(.97); background: var(--brand-dark);
+  transition-duration: var(--dur-1); transition-timing-function: var(--ease-snap);
+}
+.btn.ghost {
+  background: var(--card); color: var(--brand); border: 1.5px solid var(--brand-border);
+  box-shadow: var(--e1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn.ghost:hover { background: var(--brand-soft); border-color: var(--border-strong); transform: translateY(-1px); box-shadow: var(--e2); }
+}
+.btn.ghost:active { background: var(--brand-soft); }
+.btn.quiet {
+  background: var(--card); color: var(--ink); border: 1px solid var(--line); box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn.quiet:hover { background: var(--surface-2); border-color: var(--border-strong); transform: none; box-shadow: none; }
+}
+.btn.quiet:active { background: var(--surface-2); }
+.btn.danger { background: var(--danger-fill); color: var(--danger-on); box-shadow: 0 6px 18px rgba(179,38,30,.20); }
+.btn.danger:focus-visible { outline-color: var(--danger-fill); }
+.btn.sm { min-height: 36px; padding: 8px 14px; font-size: 13px; border-radius: var(--r-sm); }
+.btn.big { font-size: 15.5px; padding: 13px 26px; }
+/* Not opacity: .5 — that drags the label toward the page colour and fails
+   contrast at the exact moment the user is asking why it is off. */
+.btn[disabled] {
+  background: var(--surface-sunken); color: var(--text-disabled);
+  border-color: var(--border-subtle); box-shadow: none;
+  cursor: not-allowed; transform: none;
+}
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  /* Reduced motion removes travel, not feedback — the colour change is the
+     feedback that survives. */
+  .btn:active, .btn:hover { transform: none; }
+}
+
+.linkish {
+  background: none; border: none; color: var(--brand); font-size: 13.5px;
+  font-weight: 600; text-decoration: underline; padding: 4px 2px;
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────── */
+.field { margin-bottom: 14px; }
+.field label, .field .lbl {
+  display: block; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 6px;
+}
+.field .hint { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+/* --border-control, not --line: the edge of a control has to clear 3:1 against
+   its surface (WCAG 1.4.11). --line is decorative and never the sole edge of an
+   input. The inset shadow is the reciprocal of the cards' --catchlight — a card
+   catches light on its top lip, a well receives shadow on its top lip. */
+input[type="text"], input[type="date"], input[type="search"], input[type="password"],
+textarea, select {
+  width: 100%; min-height: 44px; padding: 10px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--border-control); background: var(--input-bg); color: var(--ink);
+  box-shadow: inset 0 1px 2px var(--border-inset);
+}
+input::placeholder, textarea::placeholder {
+  /* opacity: 1 is mandatory — some engines apply a default below 1 to
+     ::placeholder and silently undo whatever colour you set. */
+  color: var(--placeholder-ink); opacity: 1;
+}
+input:focus, textarea:focus, select:focus {
+  background: var(--input-bg-focus); border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring), inset 0 1px 2px var(--border-inset);
+}
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--danger-fill); }
+input:disabled, textarea:disabled, select:disabled {
+  background: var(--surface-sunken); color: var(--text-disabled);
+  border-color: var(--border-subtle); box-shadow: none;
+}
+textarea { resize: vertical; line-height: 1.65; }
+
+/* WebKit refuses to size a select that still wears the native `menulist` look:
+   the min-height above was ignored and the mood filter rendered 22px tall
+   beside its 44px siblings (Safari 26, measured — Chrome honoured it). Dropping
+   `appearance` is what makes the height real, so the chevron has to be drawn
+   here. Two data-URI arrows rather than one tinted with currentColor: a data
+   URI cannot read a CSS variable, and `img-src 'self' data:` in the CSP allows
+   exactly this. `select:focus` and `select:disabled` are repeated because both
+   set the `background` SHORTHAND above, which resets background-image — same
+   specificity, later in the file, so these win. */
+select, select:focus, select:disabled {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%236f6a73' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+}
+[data-theme="dark"] select, [data-theme="dark"] select:focus, [data-theme="dark"] select:disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238e8a95' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+}
+@media (forced-colors: active) {
+  /* Forced colours drop background images; keep the control legible as a box. */
+  select, select:focus, select:disabled { background-image: none; padding-right: 12px; }
+}
+
+/* ── The writing surface ───────────────────────────────────────────────────
+   The shell wears the family's clothes; the writing surface wears nothing.
+   No border, no field tint, no focus ring — just serif text on the panel's
+   paper with a mulberry caret. The caret IS the focus indicator for a text
+   input; every OTHER control in this file keeps the two-layer ring, so do not
+   "fix" this one. Auto-grow is done in JS (growComposer in app.js), which is
+   why overflow is hidden and resize is off. */
+.editor-body {
+  min-height: 46vh;
+  max-width: var(--measure);
+  font-family: var(--editor-font);
+  font-size: var(--t-read); line-height: var(--lh-read);
+  color: var(--prose-ink);
+  caret-color: var(--accent);
+  background: transparent;
+  border: 0; border-radius: 0;
+  box-shadow: none;
+  padding: 2px 0 0;
+  resize: none; overflow: hidden;
+  tab-size: 2;
+}
+.editor-body::placeholder { color: var(--text-tertiary); opacity: .7; }
+.editor-body:focus, .editor-body:focus-visible {
+  outline: none; box-shadow: none; background: transparent;
+}
+@media (min-width: 48em) {
+  .editor-body { font-size: var(--t-read-lg); line-height: var(--lh-read-lg); }
+}
+.field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.field-row > * { flex: 1 1 200px; min-width: 0; }
+
+/* ── Editor chrome ─────────────────────────────────────────────────────── */
+.editor-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-top: 8px;
+}
+.wordcount { font-size: 12.5px; color: var(--muted); }
+.savenote { font-size: 12.5px; font-weight: 600; color: var(--ok); }
+.savenote.err { color: var(--err-ink); font-weight: 700; }
+
+/* First run only: the one thing the app says before there is anything to
+   browse. Sits under a hairline so it reads as a footnote, not a banner. */
+.first-run-note {
+  margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 12.5px; line-height: 1.55; color: var(--muted);
+  max-width: var(--measure);
+}
+
+/* Mood chips — each carries a distinct glyph as well as a colour. */
+.mood-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.mood-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--chip-neutral-bg); border: 1.5px solid transparent; color: var(--ink);
+}
+.mood-chip .mood-glyph { width: 14px; height: 14px; flex: none; }
+.mood-chip:active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) { .mood-chip:active { transform: none; } }
+.mood-chip[aria-pressed="true"] { border-color: currentColor; font-weight: 700; }
+.mood-chip[aria-pressed="true"]::after {
+  content: "✓"; font-size: 11px; font-weight: 800; margin-left: 1px;
+}
+.mood-low    { background: var(--mood-low-bg);    color: var(--mood-low-ink); }
+.mood-quiet  { background: var(--mood-quiet-bg);  color: var(--mood-quiet-ink); }
+.mood-steady { background: var(--mood-steady-bg); color: var(--mood-steady-ink); }
+.mood-warm   { background: var(--mood-warm-bg);   color: var(--mood-warm-ink); }
+.mood-bright { background: var(--mood-bright-bg); color: var(--mood-bright-ink); }
+
+/* Row gap is 8px, not 7px, so that a 36px chip plus the gap makes a 44px row
+   pitch. The remove button's 44x44 hit area (below) then meets the one in the
+   row above edge to edge instead of overlapping it — an overlap here would
+   remove the wrong tag. */
+.tag-chips { display: flex; flex-wrap: wrap; gap: 8px 7px; margin-top: 8px; margin-bottom: 4px; }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--brand-soft); border: 1px solid var(--brand-border);
+  color: var(--brand-dark); border-radius: 999px; padding: 4px 11px;
+  font-size: 12.5px; font-weight: 600;
+}
+/* Only the editor's chips carry a remove button; the read-only chips in the
+   entry list (.entry-tags) keep their compact height. */
+.tag-chips .tag-chip { min-height: 36px; }
+.tag-chip button {
+  background: none; border: none; color: inherit; font-size: 13px; line-height: 1;
+  padding: 2px; position: relative;
+}
+/* The glyph stays small; the tappable area is the pseudo-element. 44x44 is the
+   minimum comfortable touch target, and it is centred on the "×" so where you
+   aim is where it registers. */
+.tag-chip button::after {
+  content: ""; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); width: 44px; height: 44px;
+}
+
+/* ── Filters ───────────────────────────────────────────────────────────── */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.filter-bar .field { margin-bottom: 0; }
+.search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+.search-wrap svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; color: var(--muted); pointer-events: none;
+}
+.search-wrap input { padding-left: 36px; }
+.filter-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.filter-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  background: var(--chip-neutral-bg); border: 1.5px solid transparent; color: var(--ink);
+}
+.filter-pill:active { background: var(--brand-soft); }
+.filter-pill[aria-pressed="true"] {
+  background: var(--brand-soft); border-color: var(--brand-border); color: var(--brand-dark);
+}
+.filter-pill[aria-pressed="true"]::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+}
+.list-count { font-size: 13px; color: var(--muted); margin: 14px 0 8px; }
+
+/* ── Entry list ────────────────────────────────────────────────────────── */
+.month-group { margin-bottom: 22px; }
+.month-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 0 2px 8px; border-bottom: 1px solid var(--line); margin-bottom: 10px;
+}
+/* H2 in the markup (it sits directly under the view's H1); month-sized here. */
+.month-head h2 { font-size: 14.5px; font-weight: 800; }
+.month-count { font-size: 12.5px; color: var(--muted); }
+.entry-list { display: flex; flex-direction: column; gap: 8px; }
+.entry-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 13px 14px; box-shadow: var(--shadow-sm);
+  /* No content-visibility here: the spec's rule is that contain-intrinsic-size
+     must equal the real row height, and these rows vary (tags, two-line
+     preview). A wrong intrinsic size buys a jumping scrollbar, not speed.
+     The list is paged instead (PAGE_SIZE in app.js). */
+}
+@media (hover: hover) and (pointer: fine) {
+  .entry-row:hover { background: var(--accent-quiet); border-color: var(--accent-line); }
+}
+.entry-row:active { background: var(--accent-quiet); }
+.entry-open {
+  flex: 1 1 auto; min-width: 0; text-align: left;
+  background: none; border: none; color: var(--ink); padding: 0;
+}
+.entry-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.entry-date { font-size: 12.5px; font-weight: 700; color: var(--brand-dark); }
+.entry-title { font-size: 15.5px; font-weight: 700; }
+.entry-title.untitled { color: var(--muted); font-weight: 600; font-style: italic; }
+.entry-preview {
+  font-size: 13.5px; color: var(--muted); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.entry-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.entry-tags .tag-chip { padding: 2px 9px; font-size: 11.5px; }
+.entry-actions { display: flex; gap: 4px; flex: none; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--card); color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center; position: relative;
+}
+.icon-btn svg { width: 16px; height: 16px; }
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--border-strong); }
+  .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+}
+.icon-btn:active { background: var(--surface-2); color: var(--ink); }
+.icon-btn.danger:active { color: var(--danger); border-color: var(--danger); }
+.icon-btn::after {
+  content: ""; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); width: 44px; height: 44px;
+}
+.mood-dot {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px;
+}
+.mood-dot svg { width: 12px; height: 12px; }
+
+mark { background: var(--mark-bg); color: var(--mark-ink); border-radius: 3px; padding: 0 2px; }
+
+/* ── Calendar ──────────────────────────────────────────────────────────── */
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.cal-title { font-size: 16px; font-weight: 800; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; padding-bottom: 4px; }
+.cal-cell { aspect-ratio: 1 / 1; }
+.cal-day {
+  width: 100%; height: 100%; border-radius: 10px; border: 1px solid transparent;
+  background: var(--cal-empty-bg); color: var(--muted-on-2);
+  font-size: 13px; font-weight: 600;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+}
+.cal-day.blank { background: none; cursor: default; }
+.cal-day.has {
+  background: var(--cal-has-bg); color: var(--cal-has-ink);
+  border-color: var(--cal-has-border); font-weight: 800;
+}
+/* Shape cue alongside the tint: a written day carries a dot, an empty one
+   does not. */
+.cal-day .cal-mark { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0; }
+.cal-day.has .cal-mark { opacity: 1; }
+.cal-day.today { box-shadow: 0 0 0 2px var(--cal-today-ring); }
+/* A written day deepens on hover rather than lightening, so the fill cue never
+   reverses under the pointer. */
+@media (hover: hover) and (pointer: fine) {
+  .cal-day:not(.blank):hover { background: var(--accent-quiet); }
+  .cal-day.has:hover { background: var(--cal-has-border); }
+}
+.cal-day:not(.blank):active { background: var(--accent-quiet); }
+.cal-day.has:active { background: var(--cal-has-border); }
+.cal-note { margin-top: 14px; font-size: 14px; color: var(--ink); }
+.cal-note .cal-note-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+.stat-tile { background: var(--surface-2); border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px; }
+.stat-value { font-size: 20px; font-weight: 800; letter-spacing: -.4px; }
+.stat-label { font-size: 12px; color: var(--muted-on-2); margin-top: 2px; }
+
+/* ── Status blocks, banners, toasts ────────────────────────────────────── */
+.status {
+  margin-top: 14px; padding: 11px 14px; border-radius: 10px;
+  font-size: 13.5px; font-weight: 500;
+}
+.status.info { background: var(--info-bg); color: var(--info-ink); border: 1px solid var(--info-border); }
+.status.ok   { background: var(--ok-bg);   color: var(--ok);      border: 1px solid var(--ok-border); }
+.status.err  { background: var(--err-bg);  color: var(--err-ink); border: 1px solid var(--err-border); }
+/* Neutral tone — benign outcomes (a cancelled import, an empty result). Grey,
+   calm, never red. */
+.status.note { background: var(--surface-2); color: var(--muted-on-2); border: 1px solid var(--line); }
+.status.warn { background: var(--amber-bg); color: var(--amber-ink); border: 1px solid var(--amber-border); }
+
+/* `display: flex` on the class would otherwise beat the hidden attribute's
+   UA `display: none`, leaving an empty bar above the topbar. */
+.top-banner[hidden] { display: none; }
+.top-banner {
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  background: var(--amber-bg); border-bottom: 1px solid var(--amber-border);
+  color: var(--amber-ink); font-size: 13px; font-weight: 600;
+  padding: 9px max(16px, env(safe-area-inset-right)) 9px max(16px, env(safe-area-inset-left));
+}
+.top-banner .linkish { color: inherit; }
+
+.toast-host {
+  position: fixed; left: 0; right: 0; bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: 8px; z-index: 210; pointer-events: none; padding: 0 16px;
+}
+/* Enters over --dur-3, leaves over --dur-exit-3: the exit is ~2/3 of the
+   entrance because the user has already decided. The leaving node is removed
+   in a completion handler (see dismissToast in app.js) — an exit that stops at
+   opacity: 0 leaves an invisible, focusable, screen-readable element behind. */
+.toast {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: var(--surface-inverse); color: var(--surface-canvas);
+  font-size: 13.5px; font-weight: 600;
+  padding: 11px 18px; border-radius: 999px; box-shadow: var(--e4);
+  max-width: 90vw; text-align: center; pointer-events: auto;
+  min-height: 44px;
+  opacity: 0; transform: translateY(12px) scale(.98);
+  transition: opacity var(--dur-3) var(--ease-out),
+              transform var(--dur-3) var(--ease-out);
+}
+.toast.is-shown { opacity: 1; transform: none; }
+.toast.is-leaving {
+  opacity: 0; transform: translateY(12px) scale(.98);
+  transition-duration: var(--dur-exit-3); transition-timing-function: var(--ease-in);
+}
+/* --surface-inverse flips with the theme, so the toast needs no per-theme
+   background override — only the action's accent, which has to stay legible on
+   whichever surface it lands. Light: #d69fc4 on #1c1a1f. Dark: #7b3f6b on
+   #f4f1ee. Both clear 7:1. */
+.toast button {
+  background: none; border: none; color: var(--brand-light); font-weight: 800;
+  font-size: 13.5px; text-decoration: underline; padding: 6px 6px; min-height: 44px;
+}
+[data-theme="dark"] .toast button { color: var(--accent-fill); }
+
+/* ── Empty states ──────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 4px; padding: 34px 12px 24px;
+}
+.empty-state-art { width: 84px; height: 84px; margin-bottom: 6px; }
+.es-halo { fill: var(--brand-soft); }
+.es-page { fill: var(--card); stroke: var(--brand-border); }
+.es-line { stroke: var(--brand); }
+.empty-state-title { font-size: 15px; font-weight: 800; color: var(--ink); }
+.empty-state-msg { font-size: 13.5px; color: var(--muted); line-height: 1.5; max-width: 360px; }
+/* is-neutral is for states that are not the user's doing — no search results,
+   no tag matches. A state is not a fault, and the pixels should say so as
+   plainly as the words do. */
+.empty-state.is-neutral .es-halo { fill: var(--surface-2); }
+.empty-state.is-neutral .es-page,
+.empty-state.is-neutral .es-line { stroke: var(--border-strong); }
+
+/* ── Modal ─────────────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: var(--backdrop);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+}
+.modal {
+  background: var(--card); border-radius: 18px; padding: 28px;
+  max-width: 420px; width: 100%; box-shadow: var(--shadow-lg);
+  max-height: 88vh; overflow-y: auto;
+}
+.modal.wide { max-width: 560px; }
+.modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.modal p { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+.modal-actions .btn { flex: 1; }
+
+.preview-list { margin: 4px 0 6px; padding-left: 20px; }
+.preview-list li { font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+
+/* ── Lock screen ───────────────────────────────────────────────────────── */
+.lock-screen {
+  min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.lock-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  padding: 30px; box-shadow: var(--shadow-md); max-width: 400px; width: 100%; text-align: center;
+}
+.lock-card .lock-ico { width: 46px; height: 46px; color: var(--brand); margin: 0 auto 12px; }
+/* H1 in the markup — the lock screen replaces the whole view and this is its
+   only heading. Sized as a card title, not as a page title. */
+.lock-card h1 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.lock-card p { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; }
+.lock-card input { text-align: center; font-size: 16px; letter-spacing: 2px; }
+.lock-card .btn { width: 100%; margin-top: 12px; }
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+footer {
+  text-align: center; color: var(--footer-ink); font-size: 12.5px;
+  padding: 30px 24px max(40px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line); margin-top: 30px;
+}
+footer a { color: var(--muted); }
+footer .footer-byline { display: block; margin-top: 10px; }
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 820px) {
+  .shell { grid-template-columns: 1fr; }
+  /* The rail becomes a horizontal scroller on top. min-width: 0 is required or
+     the nav's min-content forces the whole rail — and the page — wider than
+     the viewport on phones. */
+  .sidebar {
+    position: static; height: auto; min-width: 0;
+    border-right: none; border-bottom: 1px solid var(--sidebar-border);
+    padding: 12px max(14px, env(safe-area-inset-left));
+  }
+  .side-nav { flex-direction: row; overflow-x: auto; gap: 6px; }
+  .nav-item { white-space: nowrap; flex: none; }
+  .nav-item.active::before { left: 8px; right: 8px; top: auto; bottom: 2px; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
+  .side-privacy { display: none; }
+}
+@media (max-width: 560px) {
+  .stat-row { grid-template-columns: 1fr; }
+  .route-view { padding-top: 18px; }
+  .panel { padding: 18px; border-radius: 16px; }
+  .page-head h1 { font-size: 22px; }
+  .editor-body { min-height: 40vh; }
+}
+@media (max-width: 480px) {
+  /* At 375px the four destinations measure ~489px, so "Backup & lock" sat off
+     the right edge with nothing to scroll it into view. Wrapping to a second
+     row keeps every destination reachable. */
+  .side-nav { flex-wrap: wrap; overflow-x: visible; row-gap: 4px; }
+  .modal { padding: 22px; }
+  .modal-actions { flex-direction: column; }
+}
+
+/* At 375px a day cell has to clear 44px or the calendar is not touchable. The
+   arithmetic: 375 − 40 (page gutters) + 16 (the panel reclaiming its own
+   padding) − 6×4 (gaps) = 311, ÷ 7 = 44.4px. That is why the gap is 4px and not
+   6, and why the panel pulls into the gutter rather than the page doing it —
+   every other route keeps its normal margins. */
+@media (max-width: 420px) {
+  .cal-grid { gap: 4px; }
+  .cal-panel { margin-left: -8px; margin-right: -8px; padding-left: 8px; padding-right: 8px; }
+  .cal-day { min-height: 44px; }
+}
+
+/* Touch targets on phone-width screens. Below 768 every control a finger aims
+   at clears 44px in both directions. The chips keep their pill shape — the
+   padding grows, the text does not — so nothing about them reads bigger; they
+   simply stop being 35px and 30px tall next to 44px buttons. Desktop widths are
+   left alone: a mouse does not need the extra room and the rows read tighter
+   without it. The delete icon button is not listed because it already carries a
+   44x44 hit area as a pseudo-element (see .icon-btn::after), which is what a
+   finger actually lands on. */
+@media (max-width: 767px) {
+  .mood-chip { min-height: 44px; }
+  .filter-pill { min-height: 44px; }
+}
+
+/* Reduced motion collapses the tokens to 1ms — never to 0 and never
+   `transition: none`. Every transitionend / animationend completion handler
+   must still fire, or animated-out nodes are never removed. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 1ms; --dur-2: 1ms; --dur-3: 1ms; --dur-4: 1ms; --dur-5: 1ms;
+    --dur-exit-3: 1ms; --dur-exit-4: 1ms;
+    --ease-out: linear; --ease-in: linear; --ease-inout: linear;
+    --ease-snap: linear; --ease-settle: linear;
+  }
+  *, *::before, *::after {
+    animation-duration: 1ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important; scroll-behavior: auto !important;
+  }
+}
+
+/* ── Safari / iOS WebKit compatibility ─────────────────────────────────── */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* `clip`, not `hidden`, so the page never becomes a scroll container and the
+   sticky topbar keeps working. */
+html { overflow-x: clip; }
+* { -webkit-tap-highlight-color: transparent; }
+/* iOS Safari zooms the page when a focused input's font-size is < 16px. The
+   editor is excluded because it sets its own reading size (17px, already above
+   the zoom threshold) and must be able to. */
+@media (pointer: coarse) {
+  input, select, textarea:not(.editor-body) { font-size: 16px !important; }
+}
+:root { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+/* ── a11y scaffolding ──────────────────────────────────────────────────── */
+/* Keeps a focused or scrolled-to target clear of the sticky topbar (~73px)
+   instead of landing underneath it. */
+:root { scroll-padding-top: 88px; }
+.skip-link {
+  position: absolute; left: 8px; top: -48px; z-index: 60;
+  background: var(--card, #fffdfb); color: var(--brand, #7b3f6b); font-weight: 700; font-size: 13px;
+  padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--brand-border, rgba(0,0,0,.14));
+  transition: top var(--dur-2) var(--ease-out); text-decoration: none;
+}
+.skip-link:focus { top: 8px; }
+
+/* Focus — two layers. A brand-coloured ring alone is invisible on a
+   brand-coloured button; the hairline always separates it from the fill and
+   the halo always shows it against the page. Never animate the ring's
+   existence. */
+/* No border-radius here. It would set the radius of the ELEMENT, not of the
+   outline, and at (0,1,0) it ties every component rule and wins on order — so
+   a keyboard-focused pill button squared off to 3px while its mouse-focused
+   twin kept 14px. Browsers already follow the element's own radius when they
+   draw the outline. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring); outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--focus-hair), 0 0 0 6px var(--focus-halo);
+}
+/* The composer opts out — see the writing-surface block above. */
+.editor-body:focus-visible { box-shadow: none; }
+
+@media (forced-colors: active) {
+  .btn, .panel, .entry-row, .tag-chip, .mood-chip, .filter-pill { border: 1px solid CanvasText; }
+  :focus-visible { outline: 3px solid Highlight; outline-offset: 2px; }
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
