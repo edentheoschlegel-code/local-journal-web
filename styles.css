@@ -350,6 +350,16 @@ a { color: var(--brand); }
   border-bottom: 1px solid var(--line);
   box-shadow: var(--header-shadow);
 }
+/* The page is drawn under the status bar (viewport-fit=cover), and it is this
+   header, with its safe-area top padding, that keeps the clock and the Dynamic
+   Island clear of the content. When the on-screen keyboard opens, iOS pans the
+   visual viewport down to reveal the focused field but leaves the layout
+   viewport where it was, so a header stuck to the layout viewport rides up
+   above the visible area and the status bar lands on whatever is underneath.
+   Nudging the header back down by the amount iOS panned keeps it against the
+   top of what the user can actually see, which is where it was doing its job.
+   app.js measures the pan off visualViewport. */
+.topbar { transform: translateY(var(--viewport-pan, 0px)); }
 .logo {
   display: flex; align-items: center; gap: 10px;
   background: none; border: none; color: var(--ink); text-decoration: none; padding: 0;
@@ -885,15 +895,31 @@ mark { background: var(--mark-bg); color: var(--mark-ink); border-radius: 3px; p
 .empty-state.is-neutral .es-line { stroke: var(--border-strong); }
 
 /* ── Modal ─────────────────────────────────────────────────────────────── */
+/* Anchored to the visible viewport rather than the layout one. A fixed element
+   is placed against the layout viewport, which the on-screen keyboard does not
+   move, so a dialog laid out that way keeps the size and position of the whole
+   screen while the keyboard covers the lower half of it: the top runs under the
+   status bar and the buttons sit behind the keyboard. That matters most here,
+   because the dialogs that take a passcode are the ones with a field in them,
+   and the button under the keyboard is the one that confirms it. app.js
+   publishes both values off visualViewport; the fallbacks are the old
+   behaviour, for browsers that resize the layout viewport instead. */
 .modal-backdrop {
-  position: fixed; inset: 0; background: var(--backdrop);
+  position: fixed; top: var(--viewport-pan, 0px); left: 0; right: 0;
+  height: var(--viewport-height, 100dvh); background: var(--backdrop);
   -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
-  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  /* Once the box is only as tall as the visible viewport, a dialog that fills it
+     reaches the edges, and the top edge of the visible viewport is the top of
+     the screen, where the status bar is. Centring alone used to keep clear of
+     both. */
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+           max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
 }
 .modal {
   background: var(--card); border-radius: 18px; padding: 28px;
   max-width: 420px; width: 100%; box-shadow: var(--shadow-lg);
-  max-height: 88vh; overflow-y: auto;
+  max-height: 100%; overflow-y: auto;
 }
 .modal.wide { max-width: 560px; }
 .modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }

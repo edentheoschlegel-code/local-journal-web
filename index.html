@@ -10,8 +10,8 @@
        blocked. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; child-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Local Journal — A Private Journal on Your Device</title>
-  <meta name="description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device — no account, no sync, and no analytics or advertising code in the app.">
+  <title>Local Journal: A Private Journal on Your Device</title>
+  <meta name="description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device, no account, no sync, and no analytics or advertising code in the app.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
@@ -30,21 +30,21 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Local Journal">
   <meta property="og:url" content="https://localjournalapp.com/">
-  <meta property="og:title" content="Local Journal — Your journal, right on your device">
-  <meta property="og:description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device — no account, no sync, and no analytics or advertising code in the app.">
+  <meta property="og:title" content="Local Journal: Your journal, right on your device">
+  <meta property="og:description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device, no account, no sync, and no analytics or advertising code in the app.">
   <meta property="og:image" content="https://localjournalapp.com/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Local Journal — private, on your device">
+  <meta property="og:image:alt" content="Local Journal: private, on your device">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Local Journal — Your journal, right on your device">
-  <meta name="twitter:description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device — no account, no sync, and no analytics or advertising code in the app.">
+  <meta name="twitter:title" content="Local Journal: Your journal, right on your device">
+  <meta name="twitter:description" content="Write and keep a journal right on your device. Entries are stored in your browser on this device, no account, no sync, and no analytics or advertising code in the app.">
   <meta name="twitter:image" content="https://localjournalapp.com/assets/og-image.png">
   <!-- Sets data-theme before first paint (no light→dark flash). External file
        so it satisfies the strict CSP's script-src 'self'. -->
-  <script src="theme-boot.js?v=cb8e448e7d"></script>
-  <link rel="stylesheet" href="styles.css?v=cb8e448e7d">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Local Journal","url":"https://localjournalapp.com/","description":"Write and keep a journal right on your device. Entries are stored in your browser on this device — no account, no sync, and no analytics or advertising code in the app.","applicationCategory":"LifestyleApplication","operatingSystem":"Web, iOS","isAccessibleForFree":true,"browserRequirements":"Requires JavaScript. Runs in your browser on your device — no account, no sync.","publisher":{"@type":"Organization","name":"Local Journal"}}</script>
+  <script src="theme-boot.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Local Journal","url":"https://localjournalapp.com/","description":"Write and keep a journal right on your device. Entries are stored in your browser on this device, no account, no sync, and no analytics or advertising code in the app.","applicationCategory":"LifestyleApplication","operatingSystem":"Web, iOS","isAccessibleForFree":true,"browserRequirements":"Requires JavaScript. Runs in your browser on your device, no account, no sync.","publisher":{"@type":"Organization","name":"Local Journal"}}</script>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Skip to content</a>
@@ -54,7 +54,7 @@
   <div id="topBanner" class="top-banner" hidden></div>
 
   <div class="topbar">
-    <a class="logo" id="logo" href="#/write" aria-label="Local Journal — go to the editor">
+    <a class="logo" id="logo" href="#/write" aria-label="Local Journal: go to the editor">
       <img src="assets/brand-icon-512.png" alt="" width="30" height="30" aria-hidden="true">
       <b>Local <span class="wm-accent">Journal</span></b>
     </a>
@@ -101,7 +101,7 @@
   </div>
 
   <footer>
-    Local Journal — a private journal that stays on your device.<br>
+    Local Journal. A private journal that stays on your device.<br>
     Built with <a href="https://pdf-lib.js.org" target="_blank" rel="noopener noreferrer">pdf-lib</a>, bundled locally.<br>
     <a href="privacy.html">Privacy</a> · <a href="https://edenapps.app/terms.html" target="_blank" rel="noopener noreferrer">Terms</a> · <a href="support.html">Help</a><br>
     <span class="footer-byline">An Eden Apps app · <a href="https://edenapps.app" target="_blank" rel="noopener noreferrer">edenapps.app</a></span>
@@ -118,6 +118,6 @@
   <div id="srAssertive" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
   <!-- pdf-lib is lazy-loaded on first PDF export (see ensurePdfLib in app.js) -->
-  <script src="app.js?v=cb8e448e7d"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -123,11 +123,11 @@ function friendly(e) {
   if (name === "QuotaExceededError" || /quota/i.test(m)) {
     return "This device is out of space for the journal, so that entry wasn't saved. Free some space, or export a backup and remove older entries, then try again.";
   }
-  if (m === "BAD_PASSCODE") return "That passcode didn't match. There's no reset — the entries can only be opened with the passcode that locked them.";
+  if (m === "BAD_PASSCODE") return "That passcode didn't match. There's no reset. The entries can only be opened with the passcode that locked them.";
   if (m === "NO_CRYPTO") return nat(
     "This browser doesn't offer the encryption this needs. The passcode lock needs a secure page (https, or localhost).",
     "This device isn't offering the encryption the passcode lock needs, so the lock can't be turned on here.");
-  if (m === "NOT_JSON") return "Couldn't read that file as a backup — it isn't valid JSON.";
+  if (m === "NOT_JSON") return "Couldn't read that file as a backup. It isn't valid JSON.";
   if (m === "WRONG_APP") return "That backup was made by a different app, so it can't be imported here.";
   if (m === "NO_ENTRIES") return "That file is a valid backup but has no entries in it.";
   if (m === "READ_FAILED") return "Couldn't read that file from your device.";
@@ -136,15 +136,15 @@ function friendly(e) {
     "The app isn't able to store data on this device, so entries will only last until you close it.");
   if (m === "PDFLIB_FAILED") return "Couldn't load the PDF engine. Reload the page and try the export again.";
   if (/cannot encode/i.test(m) || /WinAnsi/i.test(m)) {
-    return "The PDF fonts can't draw some of the characters in your entries. Your entries are unharmed — the Markdown or JSON export keeps every character.";
+    return "The PDF fonts can't draw some of the characters in your entries. Your entries are unharmed. The Markdown or JSON export keeps every character.";
   }
   if (m === "LOCKED_NO_KEY") {
     return "The passcode lock is on but this page doesn't have it open, so nothing was written. Reload and enter your passcode. Anything still in the editor is safe to copy out first.";
   }
   if (m === "LOCK_UNKNOWN") {
-    return "Couldn't check whether the passcode lock is on, so nothing was written rather than risk saving unprotected. Reload to try again — your text stays in the editor meanwhile.";
+    return "Couldn't check whether the passcode lock is on, so nothing was written rather than risk saving unprotected. Reload to try again. Your text stays in the editor meanwhile.";
   }
-  return "Couldn't finish that — the data may be corrupt or in an unexpected format.";
+  return "Couldn't finish that. The data may be corrupt or in an unexpected format.";
 }
 
 /* ── Formatting ──────────────────────────────────────────────────────── */
@@ -1579,8 +1579,8 @@ function renderCalendarView(root) {
     btn.appendChild(document.createTextNode(String(d)));
     btn.appendChild(el("span", "cal-mark"));
     btn.setAttribute("aria-label", count
-      ? `${fmtLongDate(iso)} — ${plural(count, "entry", "entries")}. Show them.`
-      : `${fmtLongDate(iso)} — no entries. Write one.`);
+      ? `${fmtLongDate(iso)}, ${plural(count, "entry", "entries")}. Show them.`
+      : `${fmtLongDate(iso)}, no entries. Write one.`);
     btn.onclick = () => {
       if (count) {
         filterState = { q: "", tag: null, mood: null, day: iso };
@@ -1712,7 +1712,7 @@ function deliverExport(bytes, filename, host, webMsg, nativeMsg, tone, after) {
     status(host, nativeMsg, tone);
     if (after) after();
   }).catch((e) => {
-    if (isShareCancel(e)) { status(host, "Export cancelled — the file wasn't shared anywhere.", "note"); return; }
+    if (isShareCancel(e)) { status(host, "Export cancelled. The file wasn't shared anywhere.", "note"); return; }
     status(host, friendly(e), "err");
   });
 }
@@ -1894,7 +1894,7 @@ async function exportPdf(statusHost) {
   const head = `Saved a ${pdf.getPageCount()}-page PDF (${fmtBytes(bytes.length)}).`;
   let tail = "";
   if (dropped > 0) {
-    tail = ` ${plural(dropped, "character", "characters")} these PDF fonts can't draw ${dropped === 1 ? "was" : "were"} left out — the Markdown or JSON export keeps every character.`;
+    tail = ` ${plural(dropped, "character", "characters")} these PDF fonts can't draw ${dropped === 1 ? "was" : "were"} left out. The Markdown or JSON export keeps every character.`;
   }
   deliverExport(bytes, `local-journal-${stamp()}.pdf`, statusHost,
     `${head} Check your downloads.${tail}`,
@@ -2087,7 +2087,7 @@ function renderLockScreen(root) {
   // H1: the lock screen replaces the whole view, so this is the page's only
   // heading. As an H2 the screen had no H1 at all.
   card.appendChild(txt("h1", null, "Your journal is locked"));
-  card.appendChild(txt("p", null, "Enter your passcode to open it. It is checked on this device — there is nowhere else to check it."));
+  card.appendChild(txt("p", null, "Enter your passcode to open it. It is checked on this device. There is nowhere else to check it."));
 
   const label = txt("label", "sr-only", "Passcode");
   label.htmlFor = "unlockInput";
@@ -2134,8 +2134,8 @@ function renderLockScreen(root) {
 /* ── Settings view ───────────────────────────────────────────────────── */
 function renderSettingsView(root) {
   pageHead(root, "Backup & lock", nat(
-    "A backup is how your journal gets to another device — or back, if this browser's data is ever cleared.",
-    "A backup is how your journal gets to another device — or back, if the app is ever deleted."));
+    "A backup is how your journal gets to another device, or back, if this browser's data is ever cleared.",
+    "A backup is how your journal gets to another device, or back, if the app is ever deleted."));
 
   /* Export */
   const ex = el("div", "panel");
@@ -2152,8 +2152,8 @@ function renderSettingsView(root) {
     if (!entries.length) { status(exStatus, "There are no entries to export yet.", "note"); return; }
     try {
       deliverExport(new TextEncoder().encode(buildBackupJson()), `local-journal-backup-${stamp()}.json`, exStatus,
-        `Saved a backup of ${plural(entries.length, "entry", "entries")}. This file is not encrypted — keep it somewhere you trust.`,
-        `Backed up ${plural(entries.length, "entry", "entries")} to the place you chose. This file is not encrypted — keep it somewhere you trust.`,
+        `Saved a backup of ${plural(entries.length, "entry", "entries")}. This file is not encrypted. Keep it somewhere you trust.`,
+        `Backed up ${plural(entries.length, "entry", "entries")} to the place you chose. This file is not encrypted. Keep it somewhere you trust.`,
         "ok", renderSettingsMeta);
     } catch (e) { status(exStatus, friendly(e), "err"); }
   };
@@ -2246,7 +2246,7 @@ function renderSettingsView(root) {
       "Off. Entries are stored on this device in plain form, readable by anything that can read this app's storage.")));
 
   const warn = txt("div", "status warn",
-    "There is no reset. The passcode never leaves this device and is not stored anywhere, so if you forget it the entries cannot be opened again — not by you, not by anyone. Keep an exported backup somewhere safe.");
+    "There is no reset. The passcode never leaves this device and is not stored anywhere, so if you forget it the entries cannot be opened again, not by you, not by anyone. Keep an exported backup somewhere safe.");
   lk.appendChild(warn);
 
   const lkRow = el("div", "btn-row");
@@ -2373,10 +2373,10 @@ function showEnableLockModal() {
     modal.appendChild(txt("h3", null, "Turn on the passcode lock"));
     modal.appendChild(txt("p", null,
       nat(
-        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the browser reclaims the space the earlier copies used in its own time — to be certain those are gone, export a backup and then clear this site's data.",
-        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the system reclaims the space the earlier copies used in its own time — to be certain those are gone, export a backup and then delete and reinstall the app.")));
+        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the browser reclaims the space the earlier copies used in its own time, to be certain those are gone, export a backup and then clear this site's data.",
+        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the system reclaims the space the earlier copies used in its own time, to be certain those are gone, export a backup and then delete and reinstall the app.")));
     const warnBox = txt("div", "status warn",
-      "There is no reset and no recovery. Nothing about the passcode is stored — if you forget it, the entries stay encrypted for good. Export a backup first if you'd like a readable copy.");
+      "There is no reset and no recovery. Nothing about the passcode is stored, if you forget it, the entries stay encrypted for good. Export a backup first if you'd like a readable copy.");
     modal.appendChild(warnBox);
 
     const f1 = el("div", "field");
@@ -2617,7 +2617,7 @@ if (IS_NATIVE) {
   try { lockConfig = await loadLockConfig(); }
   catch (e) { lockConfig = null; lockStateUnknown = true; }
   if (lockStateUnknown) {
-    showBanner("Couldn't check whether the passcode lock is on, so nothing new will be saved on this page. Reload to try again — anything you type meanwhile can still be copied out.", true);
+    showBanner("Couldn't check whether the passcode lock is on, so nothing new will be saved on this page. Reload to try again. Anything you type meanwhile can still be copied out.", true);
   }
   if (lockConfig) {
     locked = true;
@@ -2651,4 +2651,43 @@ if (IS_NATIVE) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => { /* offline caching is a nicety, not a requirement */ });
   });
+})();
+
+// Opening the on-screen keyboard pans the visual viewport down to reveal the
+// focused field without moving the layout viewport underneath it. The header is
+// stuck to the layout viewport, so it rides up out of sight and the status bar
+// comes down on whatever is underneath instead. Publishing the pan lets the
+// stylesheet hold the header against the top of what the reader can actually
+// see. Browsers with no visualViewport resize the layout viewport rather than
+// panning, which never separates the two, so the 0px default is right there.
+// Last in the file for the same reason the block above it is: nothing after
+// this depends on it.
+(function trackViewportPan() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const root = document.documentElement;
+  let lastPan = null;
+  let lastHeight = null;
+  const sync = () => {
+    // Pinch-zoom offsets and shrinks the visual viewport as well, and the old
+    // behaviour is the right one there: a header that rode along would sit at
+    // zoom scale on top of the very thing the reader zoomed in to look at, and a
+    // dialog sized to the zoomed view would be a slot rather than a dialog. Zero
+    // means "no useful measurement" and lets the stylesheet's own fallback win.
+    const measured = vv.scale > 1 ? null : vv;
+    const pan = measured ? Math.max(0, Math.round(measured.offsetTop)) : 0;
+    const height = measured ? Math.round(measured.height) : 0;
+    if (pan !== lastPan) {
+      lastPan = pan;
+      root.style.setProperty("--viewport-pan", pan + "px");
+    }
+    if (height !== lastHeight) {
+      lastHeight = height;
+      if (height) root.style.setProperty("--viewport-height", height + "px");
+      else root.style.removeProperty("--viewport-height");
+    }
+  };
+  vv.addEventListener("resize", sync);
+  vv.addEventListener("scroll", sync);
+  sync();
 })();
