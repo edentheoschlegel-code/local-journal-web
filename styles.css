@@ -556,6 +556,18 @@ textarea, select {
   border: 1px solid var(--border-control); background: var(--input-bg); color: var(--ink);
   box-shadow: inset 0 1px 2px var(--border-inset);
 }
+/* Safari on iOS centres the value inside a date field, where every other engine
+   starts it at the edge. Left to itself the date floated in the middle of its
+   box while the title directly beneath it sat against the left, and the two
+   fields read as though they belonged to different forms. Stated here so the
+   column of fields lines up on iOS the way it already did everywhere else.
+
+   It takes both rules: Safari paints the value in an inner element of its own,
+   which keeps its own centring no matter what the field around it says. The
+   first line is what every other engine listens to; the second is the one iOS
+   actually obeys, and is ignored elsewhere. */
+input[type="date"] { text-align: start; }
+input[type="date"]::-webkit-date-and-time-value { text-align: start; }
 input::placeholder, textarea::placeholder {
   /* opacity: 1 is mandatory — some engines apply a default below 1 to
      ::placeholder and silently undo whatever colour you set. */
@@ -1030,8 +1042,33 @@ footer .footer-byline { display: block; margin-top: 10px; }
   /* The bar is fixed, so the page has to end above it rather than under it. */
   .route-view { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
 
+  /* While the keyboard is up the bar would sit in the gap between the sentence
+     being written and the keys writing it, which is the worst place to spend
+     58px on a phone. So it drops away for the length of the typing and comes
+     back when the field is let go.
+
+     Focus is the cue rather than a measurement of the keyboard, because it is
+     the browser's own answer to "is this person typing" and it cannot be fooled
+     by a toolbar collapsing or the page being pinched. The date field is left
+     out on purpose: it opens a picker, not a keyboard, so there is nothing to
+     make room for.
+
+     The reserved space above stays reserved while the bar is away, so letting go
+     of the field does not shuffle the text that was just written. Browsers
+     without :has() keep the bar where it was, which is the behaviour this
+     replaced. */
+  body:has(.route-view textarea:focus) .sidebar,
+  body:has(.route-view input:focus:not([type="date"])) .sidebar {
+    transform: translateY(100%);
+    pointer-events: none;
+  }
+  .sidebar { transition: transform .2s ease; }
+
   .modal { padding: 22px; }
   .modal-actions { flex-direction: column; }
+}
+@media (max-width: 480px) and (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none; }
 }
 
 /* At 375px a day cell has to clear 44px or the calendar is not touchable. The
