@@ -1049,8 +1049,11 @@ footer .footer-byline { display: block; margin-top: 10px; }
     left: 50%; right: auto; transform: translateX(-50%);
     top: 0; bottom: auto; width: 26px; height: 3px; border-radius: 0 0 3px 3px;
   }
-  /* The bar is fixed, so the page has to end above it rather than under it. */
-  .route-view { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
+  /* The bar is fixed, so the page has to end above it rather than under it.
+     The clearance lives on the footer because the footer is the page's true
+     last element; padding the route view instead left the footer's own lines
+     to slide under the bar. */
+  footer { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px); }
 
   /* While the keyboard is up the bar would sit in the gap between the sentence
      being written and the keys writing it, which is the worst place to spend
