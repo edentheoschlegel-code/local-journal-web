@@ -568,6 +568,16 @@ textarea, select {
    actually obeys, and is ignored elsewhere. */
 input[type="date"] { text-align: start; }
 input[type="date"]::-webkit-date-and-time-value { text-align: start; }
+/* The native control on iOS also carries a width of its own, drawn from the
+   date it is showing, and it wins over the 100% above. The date field then sat
+   wider than the title directly beneath it, which is the one place in the form
+   where two fields are read as a pair. Dropping the native appearance hands the
+   width back to the stylesheet, and the field matches its neighbour. Tapping it
+   still opens the system picker; only the drawing of the closed field changes. */
+input[type="date"] {
+  -webkit-appearance: none; appearance: none;
+  min-width: 0; max-width: 100%;
+}
 input::placeholder, textarea::placeholder {
   /* opacity: 1 is mandatory — some engines apply a default below 1 to
      ::placeholder and silently undo whatever colour you set. */

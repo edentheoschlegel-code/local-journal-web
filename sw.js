@@ -18,7 +18,7 @@
    CACHE carries a release token: bump it on every release. activate() deletes every
    cache whose key is not the current one, which is what drops a previous build's
    assets instead of leaving them to be matched forever. */
-const CACHE = "localjournal-offline-20260816c";
+const CACHE = "localjournal-offline-20260816d";
 
 self.addEventListener("install", (event) => {
   // Precache the shell HTML AND its own same-origin dependencies (scripts,
