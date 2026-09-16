@@ -2373,10 +2373,10 @@ function showEnableLockModal() {
     modal.appendChild(txt("h3", null, "Turn on the passcode lock"));
     modal.appendChild(txt("p", null,
       nat(
-        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the browser reclaims the space the earlier copies used in its own time, to be certain those are gone, export a backup and then clear this site's data.",
-        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the system reclaims the space the earlier copies used in its own time, to be certain those are gone, export a backup and then delete and reinstall the app.")));
+        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the browser reclaims the space the earlier copies used in its own time. To be certain those are gone, export a backup and then clear this site's data.",
+        "From now on your entries are stored encrypted on this device, and you'll need this passcode every time you open the journal. Existing entries are rewritten encrypted too, though the system reclaims the space the earlier copies used in its own time. To be certain those are gone, export a backup and then delete and reinstall the app.")));
     const warnBox = txt("div", "status warn",
-      "There is no reset and no recovery. Nothing about the passcode is stored, if you forget it, the entries stay encrypted for good. Export a backup first if you'd like a readable copy.");
+      "There is no reset and no recovery. Your passcode itself is never stored. If you forget it, the entries stay encrypted for good. Export a backup first if you'd like a readable copy.");
     modal.appendChild(warnBox);
 
     const f1 = el("div", "field");
