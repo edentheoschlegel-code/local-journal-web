@@ -62,6 +62,8 @@ onto the script and style URLs. It is a deploy convenience, not a requirement.
 
 ## License
 
-MIT. Bundled third-party code and its licence: `THIRD-PARTY-LICENSES.txt`.
+Copyright (c) 2026 Eden Apps. All rights reserved.
+
+This is not open-source software. Please do not copy, modify or redistribute it without written permission from Eden Apps. Bundled third-party code keeps its own licenses: see `THIRD-PARTY-LICENSES.txt`.
 
 An Eden Apps app · [edenapps.app](https://edenapps.app)
